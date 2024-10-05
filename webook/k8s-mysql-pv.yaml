@@ -4,7 +4,7 @@ metadata:
   name: webook-msyql-pv
 
 spec:
-  storageClassName: webook
+  storageClassName: webook-mysql
   capacity:
     storage: 1Gi
   accessModes:

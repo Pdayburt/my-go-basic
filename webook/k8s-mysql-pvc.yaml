@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: webook-mysql-claim
 spec:
-  storageClassName: webook
+  storageClassName: webook-mysql
   accessModes:
     - ReadWriteOnce
   resources:

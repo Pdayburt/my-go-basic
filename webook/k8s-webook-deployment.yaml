@@ -1,18 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: webook
 
 spec:
-
   replicas: 3
-
   selector:
     matchLabels:
       app: webook
-      #template 描述你的POD是什么样子
-
-
+ #template 描述你的POD是什么样子
   template:
     metadata:
       labels:

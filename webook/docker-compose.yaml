@@ -13,13 +13,13 @@ services:
             -  ./script/mysql/:/docker-entrypoint-initdb.d/
         ports:
             #      注意这里我映射为了 13316 端口
-            -   "13316:3306"
+            -   "13306:3306"
     redis:
         image: redis:latest
         environment:
             - ALLOW_EMPTY_PASSWORD=yes
         ports:
-            - '6379:6379'
+            - '16379:6379'
 
     etcd:
         image: 'bitnami/etcd:3.5'
@@ -28,3 +28,11 @@ services:
         ports:
             #      所以你要用 12379 端口来连接 etcd
             - "12379:2379"
+    mongo:
+        image: mongo:8.0.0
+        restart: always
+        environment:
+          MONGO_INITDB_ROOT_USERNAME: root
+          MONGO_INITDB_ROOT_PASSWORD: root
+        ports:
+          - "27017:27017"

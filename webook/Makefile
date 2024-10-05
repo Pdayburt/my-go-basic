@@ -1,8 +1,9 @@
 .PHONY: docker mockgen
 docker:
 	@rm webook || true
+	@go mod tidy
 	@GOOS=linux GOARCH=arm go build -tags=k8s  -o webook .
-	@docker rmi -f jack/webbook:v0.0.1
+	@docker rmi -f jack/webbook:v0.0.2
 	@docker build -t jack/webbook:v0.0.2 .
 
 mockgen:
