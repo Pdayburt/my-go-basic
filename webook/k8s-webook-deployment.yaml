@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webook
+
+spec:
+
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: webook
+      #template 描述你的POD是什么样子
+
+
+  template:
+    metadata:
+      labels:
+        app: webook
+#POD的具体信息即container的信息
+    spec:
+      containers:
+        - name: webook
+          image: jack/webbook:v0.0.2
+          ports:
+            - containerPort: 8080
+
