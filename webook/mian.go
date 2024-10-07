@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
@@ -15,29 +16,29 @@ func main() {
 
 	InitViperV1()
 	InitLogger()
-	ginServer := InitWebServerByWire()
+	InitPrometheus()
+	app := InitWebServerByWire()
 
+	for _, c := range app.consumer {
+		err := c.Start()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	ginServer := app.server
 	ginServer.GET("/hello", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "hello webook")
 	})
+	ginServer.Run(":8080")
 
-	if err := ginServer.Run(":8080"); err != nil {
-		zap.L().Error("程序启动失败～～～", zap.Error(err), zap.String("server", "webook"))
-	}
-	/*	db := initDbB()
-		redis := initRedis()
-		ginServer := initWebServer()
+}
 
-		userHandler := initUser(db, redis)
-
-		userHandler.RegisterRoutes(ginServer)
-		ginServer.GET("/hello", func(c *gin.Context) {
-			c.String(http.StatusOK, "hello k8s")
-		})*/
-
-	/*ginServer := InitWebServerByWire()
-	ginServer.Run(":8080")*/
-
+func InitPrometheus() {
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(":8081", nil)
+	}()
 }
 
 func InitLogger() {
@@ -87,7 +88,7 @@ func InitViperV2() {
 
 // InitViperV1 使用结构体读取额配置文件
 func InitViperV1() {
-	viper.SetConfigFile("./config/dev.yaml")
+	viper.SetConfigFile("/Users/anatkh/Downloads/blockChain/golang/my-go-basic/webook/config/dev.yaml")
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))

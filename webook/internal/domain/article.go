@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 const (
 	ArticleStatusUnknown ArticleStatus = iota
 	ArticleStatusUnpublished
@@ -14,6 +16,17 @@ type Article struct {
 	//Author从用户来
 	Author Author
 	Status ArticleStatus
+	Ctime  time.Time
+	Utime  time.Time
+}
+
+func (a *Article) Abstract() string {
+	//摘要取 前几句
+	cs := []rune(a.Content)
+	if len(cs) < 100 {
+		return a.Content
+	}
+	return string(cs[:100])
 }
 
 type Author struct {

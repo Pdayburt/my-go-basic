@@ -3,26 +3,26 @@ package service
 import (
 	"context"
 	"example.com/mod/webook/internal/domain"
+	"example.com/mod/webook/internal/events/article"
 	"example.com/mod/webook/internal/repository"
-	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (int64, error)
 	Publish(ctx context.Context, article domain.Article) (int64, error)
-	Withdraw(ctx *gin.Context, article domain.Article) error
+	Withdraw(ctx context.Context, article domain.Article) error
+	List(ctx context.Context, uid int64, offset int, limit int) ([]domain.Article, error)
+	GetById(ctx context.Context, uid int64, id int64) (domain.Article, error)
+	GetPublishedById(ctx context.Context, uid int64, id int64) (domain.Article, error)
 }
 
 type articleService struct {
 	repo repository.ArticleRepository
 	//
-	author repository.ArticleAuthorRepository
-	reader repository.ArticleReaderRepository
-}
-
-func (as *articleService) Withdraw(ctx *gin.Context, article domain.Article) error {
-	article.Status = domain.ArticleStatusPrivate
-	return as.repo.SyncStatus(ctx, article)
+	author   repository.ArticleAuthorRepository
+	reader   repository.ArticleReaderRepository
+	producer article.Producer
 }
 
 /*func NewArticleService(author repository.ArticleAuthorRepository, reader repository.ArticleReaderRepository) ArticleService {
@@ -32,10 +32,42 @@ func (as *articleService) Withdraw(ctx *gin.Context, article domain.Article) err
 	}
 }*/
 
-func NewArticleService(repo repository.ArticleRepository) ArticleService {
+func NewArticleService(repo repository.ArticleRepository, producer article.Producer) ArticleService {
 	return &articleService{
-		repo: repo,
+		repo:     repo,
+		producer: producer,
 	}
+}
+
+func (as *articleService) GetPublishedById(ctx context.Context, uid int64, id int64) (domain.Article, error) {
+	art, err := as.repo.GetPublishedById(ctx, uid, id)
+	if err != nil {
+		go func() {
+			er := as.producer.ProducerReadEvent(ctx, article.ReadEvent{
+				Uid: uid,
+				Aid: id,
+			})
+			if er != nil {
+				zap.L().Error("发送消息至kafka失败", zap.Error(err))
+			}
+		}()
+	}
+
+	return art, err
+
+}
+
+func (as *articleService) GetById(ctx context.Context, uid int64, id int64) (domain.Article, error) {
+	return as.repo.GetById(ctx, uid, id)
+}
+
+func (as *articleService) List(ctx context.Context, uid int64, offset int, limit int) ([]domain.Article, error) {
+	return as.repo.List(ctx, uid, offset, limit)
+}
+
+func (as *articleService) Withdraw(ctx context.Context, article domain.Article) error {
+	article.Status = domain.ArticleStatusPrivate
+	return as.repo.SyncStatus(ctx, article)
 }
 
 func (as *articleService) Publish(ctx context.Context, article domain.Article) (int64, error) {

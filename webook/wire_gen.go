@@ -7,19 +7,22 @@
 package main
 
 import (
+	"example.com/mod/webook/internal/events/article"
 	"example.com/mod/webook/internal/ioc"
 	"example.com/mod/webook/internal/repository"
 	"example.com/mod/webook/internal/repository/cache"
 	"example.com/mod/webook/internal/repository/dao"
 	"example.com/mod/webook/internal/service"
 	"example.com/mod/webook/internal/web"
-	"github.com/gin-gonic/gin"
-	"github.com/google/wire"
+)
+
+import (
+	_ "github.com/spf13/viper/remote"
 )
 
 // Injectors from wire.go:
 
-func InitWebServerByWire() *gin.Engine {
+func InitWebServerByWire() *App {
 	v := ioc.InitMiddlewares()
 	db := ioc.InitDbB()
 	userDao := dao.NewUserDao(db)
@@ -34,21 +37,22 @@ func InitWebServerByWire() *gin.Engine {
 	userHandler := web.NewUserHandler(userService, codeService)
 	articleDao := dao.NewArticleDao(db)
 	articleRepository := repository.NewArticleRepository(articleDao)
-	articleService := service.NewArticleService(articleRepository)
-	articleHandler := web.NewArticleHandler(articleService)
+
+	client := ioc.InitKafka()
+	syncProducer := ioc.NewSyncProducer(client)
+	producer := article.NewKafkaProducer(syncProducer)
+	articleService := service.NewArticleService(articleRepository, producer)
+	interactiveDao := dao.NewInteractiveDao(db)
+	interactiveCache := cache.NewInteractiveCache(cmdable)
+	interactiveRepository := repository.NewInteractiveRepository(interactiveDao, interactiveCache)
+	interactiveService := service.NewInteractiveService(interactiveRepository)
+	articleHandler := web.NewArticleHandler(articleService, interactiveService)
 	engine := ioc.InitGin(v, userHandler, articleHandler)
-	return engine
+	interactiveReadEventConsumer := article.NewInteractiveReadEventConsumer(client, interactiveRepository)
+	v2 := ioc.NewConsumer(interactiveReadEventConsumer)
+	app := &App{
+		server:   engine,
+		consumer: v2,
+	}
+	return app
 }
-
-func InitArticleHandler() *web.ArticleHandler {
-	db := ioc.InitDbB()
-	articleDao := dao.NewArticleDao(db)
-	articleRepository := repository.NewArticleRepository(articleDao)
-	articleService := service.NewArticleService(articleRepository)
-	articleHandler := web.NewArticleHandler(articleService)
-	return articleHandler
-}
-
-// wire.go:
-
-var thirdPart = wire.NewSet(ioc.InitDbB, ioc.InitRedis, ioc.InitSMService)

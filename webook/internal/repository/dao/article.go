@@ -3,7 +3,6 @@ package dao
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"time"
@@ -16,14 +15,49 @@ type ArticleDao interface {
 	Sync(ctx context.Context, article Article) (int64, error)
 	Upsert(ctx context.Context, publishArticle PublicArticle) error
 	Transaction(ctx context.Context, bizFun func(txDao ArticleDao) error) error
-	SyncStatus(ctx *gin.Context, entity Article) error
+	SyncStatus(ctx context.Context, entity Article) error
+	GetByAuthor(ctx context.Context, uid int64, offset int, limit int) ([]Article, error)
+	GetById(ctx context.Context, uid int64, id int64) (Article, error)
+	GetPubById(ctx context.Context, id int64) (Article, error)
 }
 
 type GORMArticleDAO struct {
 	db *gorm.DB
 }
 
-func (G *GORMArticleDAO) SyncStatus(ctx *gin.Context, art Article) error {
+func (G *GORMArticleDAO) GetPubById(ctx context.Context, id int64) (Article, error) {
+
+	//TODO implement me
+	panic("implement me")
+}
+
+func (G *GORMArticleDAO) GetById(ctx context.Context, uid int64, id int64) (Article, error) {
+
+	var article Article
+	err := G.db.WithContext(ctx).Model(&article).
+		Where("id = ? and author_id = ?", id, uid).
+		Find(&article).Error
+	return article, err
+}
+
+func NewArticleDao(db *gorm.DB) ArticleDao {
+	return &GORMArticleDAO{
+		db: db,
+	}
+}
+
+func (G *GORMArticleDAO) GetByAuthor(ctx context.Context, uid int64, offset int, limit int) ([]Article, error) {
+	var articles []Article
+	err := G.db.WithContext(ctx).Model(&Article{}).
+		Where("author_id = ?", uid).
+		Offset(offset).
+		Limit(limit).
+		Order("utime desc").
+		Find(&articles).Error
+	return articles, err
+}
+
+func (G *GORMArticleDAO) SyncStatus(ctx context.Context, art Article) error {
 	now := time.Now().UnixMilli()
 	return G.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
@@ -163,10 +197,4 @@ type Article struct {
 
 type PublicArticle struct {
 	Article
-}
-
-func NewArticleDao(db *gorm.DB) ArticleDao {
-	return &GORMArticleDAO{
-		db: db,
-	}
 }

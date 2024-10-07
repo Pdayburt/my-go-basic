@@ -34,6 +34,7 @@ func NewUserDao(db *gorm.DB) UserDao {
 // 对应与数据库表结构一一对应
 type User struct {
 	Id       int64          `gorm:"primaryKey,AUTO_INCREMENT"`
+	NickName string         `gorm:"type:varchar(255)"`
 	Email    sql.NullString `gorm:"unique"`
 	Password string
 	Ctime    int64
