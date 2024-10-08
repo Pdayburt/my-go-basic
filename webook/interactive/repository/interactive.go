@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"example.com/mod/webook/internal/domain"
-	"example.com/mod/webook/internal/repository/cache"
-	"example.com/mod/webook/internal/repository/dao"
+	"example.com/mod/webook/interactive/domain"
+	"example.com/mod/webook/interactive/repository/cache"
+	"example.com/mod/webook/interactive/repository/dao"
 	"go.uber.org/zap"
 )
 

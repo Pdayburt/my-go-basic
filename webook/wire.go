@@ -3,6 +3,11 @@
 package main
 
 import (
+	"example.com/mod/webook/interactive/events"
+	repository2 "example.com/mod/webook/interactive/repository"
+	cache2 "example.com/mod/webook/interactive/repository/cache"
+	dao2 "example.com/mod/webook/interactive/repository/dao"
+	service2 "example.com/mod/webook/interactive/service"
 	"example.com/mod/webook/internal/events/article"
 	ioc2 "example.com/mod/webook/internal/ioc"
 	"example.com/mod/webook/internal/repository"
@@ -25,7 +30,7 @@ func InitWebServerByWire() *App {
 		ioc2.InitKafka,
 		ioc2.NewSyncProducer,
 
-		article.NewInteractiveReadEventConsumer,
+		events.NewInteractiveReadEventConsumer,
 		article.NewKafkaProducer,
 		ioc2.NewConsumer,
 		ioc2.InitJobs,
@@ -33,15 +38,15 @@ func InitWebServerByWire() *App {
 		ioc2.InitRankingJob,
 
 		//dao.NewUserDao,
-		dao.NewUserDao, dao.NewArticleDao, dao.NewInteractiveDao,
-		cache.NewUserCache, cache.NewCodeCache, cache.NewInteractiveCache,
+		dao.NewUserDao, dao.NewArticleDao, dao2.NewInteractiveDao,
+		cache.NewUserCache, cache.NewCodeCache, cache2.NewInteractiveCache,
 		repository.NewCodeRepository, repository.NewUserRepository,
 		repository.NewArticleRepository,
-		repository.NewInteractiveRepository,
+		repository2.NewInteractiveRepository,
 
 		service.NewUserService, service.NewCodeService,
 		service.NewArticleService,
-		service.NewInteractiveService,
+		service2.NewInteractiveService,
 		rankingServiceSet,
 
 		web.NewUserHandler,

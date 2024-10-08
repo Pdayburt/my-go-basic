@@ -1,13 +1,15 @@
-package article
+package events
 
 import (
 	"context"
-	"example.com/mod/webook/internal/repository"
+	"example.com/mod/webook/interactive/repository"
 	"example.com/mod/webook/pkg/saramax"
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
 	"time"
 )
+
+var _ Consumer = &InteractiveReadEventConsumer{}
 
 type InteractiveReadEventConsumer struct {
 	client sarama.Client
@@ -30,7 +32,7 @@ func (k *InteractiveReadEventConsumer) Start() error {
 	}
 	go func() {
 		err := cg.Consume(context.Background(),
-			[]string{"article_read"},
+			[]string{"_read"},
 			saramax.NewHandler[ReadEvent](k.Consume))
 		if err != nil {
 			zap.L().Error("退出消费循环一场", zap.Error(err))
@@ -42,5 +44,5 @@ func (k *InteractiveReadEventConsumer) Start() error {
 func (k *InteractiveReadEventConsumer) Consume(msg *sarama.ConsumerMessage, t ReadEvent) error {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second)
 	defer cancelFunc()
-	return k.repo.IncrReadCnt(ctx, "article", t.Aid)
+	return k.repo.IncrReadCnt(ctx, "", t.Aid)
 }

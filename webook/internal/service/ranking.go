@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"example.com/mod/webook/interactive/service"
 	"example.com/mod/webook/internal/domain"
 	"github.com/ecodeclub/ekit/queue"
 	"go.uber.org/zap"
@@ -15,13 +16,13 @@ type RankingService interface {
 
 type BatchRankingService struct {
 	artSvc    ArticleService
-	intrSvc   InteractiveService
+	intrSvc   service.InteractiveService
 	batchSize int
 	n         int
 	scoreFunc func(t time.Time, likeCnt int64) float64
 }
 
-func NewBatchRankingService(artSvc ArticleService, intrSvc InteractiveService) RankingService {
+func NewBatchRankingService(artSvc ArticleService, intrSvc service.InteractiveService) RankingService {
 	return &BatchRankingService{artSvc: artSvc, intrSvc: intrSvc}
 }
 

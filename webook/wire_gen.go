@@ -7,6 +7,11 @@
 package main
 
 import (
+	"example.com/mod/webook/interactive/events"
+	repository2 "example.com/mod/webook/interactive/repository"
+	cache2 "example.com/mod/webook/interactive/repository/cache"
+	dao2 "example.com/mod/webook/interactive/repository/dao"
+	service2 "example.com/mod/webook/interactive/service"
 	"example.com/mod/webook/internal/events/article"
 	"example.com/mod/webook/internal/ioc"
 	"example.com/mod/webook/internal/repository"
@@ -42,13 +47,13 @@ func InitWebServerByWire() *App {
 	syncProducer := ioc.NewSyncProducer(client)
 	producer := article.NewKafkaProducer(syncProducer)
 	articleService := service.NewArticleService(articleRepository, producer)
-	interactiveDao := dao.NewInteractiveDao(db)
-	interactiveCache := cache.NewInteractiveCache(cmdable)
-	interactiveRepository := repository.NewInteractiveRepository(interactiveDao, interactiveCache)
-	interactiveService := service.NewInteractiveService(interactiveRepository)
+	interactiveDao := dao2.NewInteractiveDao(db)
+	interactiveCache := cache2.NewInteractiveCache(cmdable)
+	interactiveRepository := repository2.NewInteractiveRepository(interactiveDao, interactiveCache)
+	interactiveService := service2.NewInteractiveService(interactiveRepository)
 	articleHandler := web.NewArticleHandler(articleService, interactiveService)
 	engine := ioc.InitGin(v, userHandler, articleHandler)
-	interactiveReadEventConsumer := article.NewInteractiveReadEventConsumer(client, interactiveRepository)
+	interactiveReadEventConsumer := events.NewInteractiveReadEventConsumer(client, interactiveRepository)
 	v2 := ioc.NewConsumer(interactiveReadEventConsumer)
 	rankingService := service.NewBatchRankingService(articleService, interactiveService)
 	job := ioc.InitRankingJob(rankingService)

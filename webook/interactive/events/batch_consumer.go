@@ -1,8 +1,8 @@
-package article
+package events
 
 import (
 	"context"
-	"example.com/mod/webook/internal/repository"
+	"example.com/mod/webook/interactive/repository"
 	"example.com/mod/webook/pkg/saramax"
 	"github.com/IBM/sarama"
 	"go.uber.org/zap"
