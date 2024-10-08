@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+option go_package = "intr/v1;intrv1";
+
+service InteractiveService {
+    rpc IncrReadCnt(IncrReadCntReq)returns (IncrReadCntResp);
+    rpc Like(LikeReq) returns (LikeReq);
+    rpc CancelLike(CancelLikeReq)returns (CancelLikeResp);
+    rpc Collect(CollectReq) returns (CollectResp);
+    rpc Get(GetReq) returns (GetResp);
+    rpc GetByIds(GetByIdsReq)returns (GetByIdsResp);
+}
+
+//biz string, ids []int64 ////package intr.v1;
+message GetByIdsReq{
+    string biz = 1;
+    repeated int64 ids = 2;
+}
+
+//domain.Interactive, error
+message GetByIdsResp{
+    Interactive intr = 1;
+}
+
+message GetReq{
+    string biz = 1;
+    int64 biz_id = 2;
+    int64 uid = 3;
+}
+//(domain.Interactive, error)
+message GetResp{
+    Interactive intr = 1;
+}
+
+message Interactive{
+
+}
+
+message IncrReadCntReq{
+    string biz = 1;
+    int64 biz_id = 2;
+}
+
+message IncrReadCntResp{
+
+}
+
+message LikeReq{
+    string biz = 1;
+    int64 biz_id = 2;
+    int64 uid = 3;
+}
+
+message LikeResp{
+
+}
+
+message CancelLikeReq{
+    string biz = 1;
+    int64 biz_id = 2;
+    int64 uid = 3;
+}
+
+message CancelLikeResp{
+
+}
+
+message CollectReq{
+    string biz = 1;
+    int64 biz_id = 2;
+    int64 cid = 3;
+    int64 uid = 4;
+}
+
+message CollectResp{
+
+}
