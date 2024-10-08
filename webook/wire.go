@@ -13,6 +13,10 @@ import (
 	"github.com/google/wire"
 )
 
+var rankingServiceSet = wire.NewSet(
+	service.NewBatchRankingService,
+)
+
 func InitWebServerByWire() *App {
 
 	wire.Build(
@@ -24,6 +28,9 @@ func InitWebServerByWire() *App {
 		article.NewInteractiveReadEventConsumer,
 		article.NewKafkaProducer,
 		ioc2.NewConsumer,
+		ioc2.InitJobs,
+		ioc2.InitRankingJobAdapter,
+		ioc2.InitRankingJob,
 
 		//dao.NewUserDao,
 		dao.NewUserDao, dao.NewArticleDao, dao.NewInteractiveDao,
@@ -35,6 +42,7 @@ func InitWebServerByWire() *App {
 		service.NewUserService, service.NewCodeService,
 		service.NewArticleService,
 		service.NewInteractiveService,
+		rankingServiceSet,
 
 		web.NewUserHandler,
 		web.NewArticleHandler,

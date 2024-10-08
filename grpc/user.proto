@@ -1,0 +1,25 @@
+syntax = "proto3";
+option go_package = "example.com/mod/grpc";
+
+
+message User{
+    int64  id =1;
+    string  name = 2;
+    string avatar = 4;
+    map<string ,string > attribute= 5;
+}
+
+message GetByIdReq{
+    int64 id = 1;
+}
+
+message GetByIdResp{
+    User user = 1;
+}
+
+service UserService{
+    rpc GetById(GetByIdReq)returns (GetByIdResp);
+}
+
+
+

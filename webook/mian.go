@@ -26,6 +26,14 @@ func main() {
 		}
 	}
 
+	cron := app.cron
+	cron.Start()
+	defer func() {
+		stop := cron.Stop()
+		<-stop.Done()
+
+	}()
+
 	ginServer := app.server
 	ginServer.GET("/hello", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "hello webook")

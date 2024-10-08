@@ -14,6 +14,7 @@ import (
 	"example.com/mod/webook/internal/repository/dao"
 	"example.com/mod/webook/internal/service"
 	"example.com/mod/webook/internal/web"
+	"github.com/google/wire"
 )
 
 import (
@@ -37,7 +38,6 @@ func InitWebServerByWire() *App {
 	userHandler := web.NewUserHandler(userService, codeService)
 	articleDao := dao.NewArticleDao(db)
 	articleRepository := repository.NewArticleRepository(articleDao)
-
 	client := ioc.InitKafka()
 	syncProducer := ioc.NewSyncProducer(client)
 	producer := article.NewKafkaProducer(syncProducer)
@@ -50,9 +50,18 @@ func InitWebServerByWire() *App {
 	engine := ioc.InitGin(v, userHandler, articleHandler)
 	interactiveReadEventConsumer := article.NewInteractiveReadEventConsumer(client, interactiveRepository)
 	v2 := ioc.NewConsumer(interactiveReadEventConsumer)
+	rankingService := service.NewBatchRankingService(articleService, interactiveService)
+	job := ioc.InitRankingJob(rankingService)
+	rankingJobAdapter := ioc.InitRankingJobAdapter(job)
+	cron := ioc.InitJobs(rankingJobAdapter)
 	app := &App{
 		server:   engine,
 		consumer: v2,
+		cron:     cron,
 	}
 	return app
 }
+
+// wire.go:
+
+var rankingServiceSet = wire.NewSet(service.NewBatchRankingService)

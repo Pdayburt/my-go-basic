@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
+//go:generate mockgen -source=./article.go -package=svcmocks -destination=svcmocks/article.mock.go ArticleService
 type ArticleService interface {
 	Save(ctx context.Context, article domain.Article) (int64, error)
 	Publish(ctx context.Context, article domain.Article) (int64, error)
@@ -15,6 +16,7 @@ type ArticleService interface {
 	List(ctx context.Context, uid int64, offset int, limit int) ([]domain.Article, error)
 	GetById(ctx context.Context, uid int64, id int64) (domain.Article, error)
 	GetPublishedById(ctx context.Context, uid int64, id int64) (domain.Article, error)
+	ListPub(ctx context.Context, offset int, limit int) ([]domain.Article, error)
 }
 
 type articleService struct {
@@ -23,6 +25,11 @@ type articleService struct {
 	author   repository.ArticleAuthorRepository
 	reader   repository.ArticleReaderRepository
 	producer article.Producer
+}
+
+func (as *articleService) ListPub(ctx context.Context, offset int, limit int) ([]domain.Article, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 /*func NewArticleService(author repository.ArticleAuthorRepository, reader repository.ArticleReaderRepository) ArticleService {
