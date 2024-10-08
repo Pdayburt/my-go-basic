@@ -15,3 +15,6 @@ mockgen:
 	@mockgen -source=./internal/service/sms/types.go -package=ratelimitmocks -destination=./internal/service/sms/ratelimitmocks/types.go
 	@mockgen -source=./pkg/ratelimit/types.go -package=limitmocks -destination=./pkg/ratelimit/limitmocks/types.go
 	@go mod tidy
+.PHONY: grpc
+grpc:
+	@buf generate
