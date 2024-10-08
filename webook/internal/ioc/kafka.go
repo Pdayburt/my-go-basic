@@ -1,8 +1,7 @@
 package ioc
 
 import (
-	"example.com/mod/webook/internal/events"
-	"example.com/mod/webook/internal/events/article"
+	events2 "example.com/mod/webook/interactive/events"
 	"github.com/IBM/sarama"
 	"github.com/spf13/viper"
 )
@@ -34,7 +33,7 @@ func NewSyncProducer(client sarama.Client) sarama.SyncProducer {
 }
 
 // 多个消费者在这里注册
-func NewConsumer(cl *article.InteractiveReadEventConsumer) []events.Consumer {
-	return []events.Consumer{cl}
+func NewConsumer(cl *events2.InteractiveReadEventConsumer) []events2.Consumer {
+	return []events2.Consumer{cl}
 
 }

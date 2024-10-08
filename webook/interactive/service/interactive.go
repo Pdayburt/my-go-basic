@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"example.com/mod/webook/internal/domain"
-	"example.com/mod/webook/internal/repository"
+	"example.com/mod/webook/interactive/domain"
+	"example.com/mod/webook/interactive/repository"
 	"golang.org/x/sync/errgroup"
 )
 

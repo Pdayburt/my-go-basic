@@ -1,7 +1,7 @@
 package main
 
 import (
-	"example.com/mod/webook/internal/events"
+	"example.com/mod/webook/interactive/events"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 )

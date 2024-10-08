@@ -3,7 +3,7 @@ package cache
 import (
 	"context"
 	_ "embed"
-	"example.com/mod/webook/internal/domain"
+	"example.com/mod/webook/interactive/domain"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"strconv"

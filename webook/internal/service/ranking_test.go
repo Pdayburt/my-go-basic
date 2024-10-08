@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	domain2 "example.com/mod/webook/interactive/domain"
+	"example.com/mod/webook/interactive/service"
 	"example.com/mod/webook/internal/domain"
 	"example.com/mod/webook/internal/service/svcmocks"
 	"github.com/stretchr/testify/assert"
@@ -14,14 +16,14 @@ func TestBatchRankingService_TopN(t *testing.T) {
 	now := time.Now()
 	testCase := []struct {
 		name    string
-		mock    func(ctrl *gomock.Controller) (ArticleService, InteractiveService)
+		mock    func(ctrl *gomock.Controller) (ArticleService, service.InteractiveService)
 		wantErr error
 		wantRes []domain.Article
 	}{
 		{
 			name: "计算成功",
 			//怎么模拟数据？
-			mock: func(ctrl *gomock.Controller) (ArticleService, InteractiveService) {
+			mock: func(ctrl *gomock.Controller) (ArticleService, service.InteractiveService) {
 
 				artSvc := svcmocks.NewMockArticleService(ctrl)
 				artSvc.EXPECT().ListPub(gomock.Any(), 0, 3).
@@ -34,7 +36,7 @@ func TestBatchRankingService_TopN(t *testing.T) {
 				intrSvc := svcmocks.NewMockInteractiveService(ctrl)
 				intrSvc.EXPECT().GetByIds(gomock.Any(),
 					"article", []int64{1, 2, 3}).
-					Return([]domain.Interactive{
+					Return([]domain2.Interactive{
 						{BizId: 1, LikeCnt: 1},
 						{BizId: 2, LikeCnt: 2},
 						{BizId: 3, LikeCnt: 3},

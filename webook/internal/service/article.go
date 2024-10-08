@@ -22,8 +22,8 @@ type ArticleService interface {
 type articleService struct {
 	repo repository.ArticleRepository
 	//
-	author   repository.ArticleAuthorRepository
-	reader   repository.ArticleReaderRepository
+	/*author   repository.ArticleAuthorRepository
+	reader   repository.ArticleReaderRepository*/
 	producer article.Producer
 }
 

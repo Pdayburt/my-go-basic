@@ -2,6 +2,8 @@ package web
 
 import (
 	"errors"
+	domain2 "example.com/mod/webook/interactive/domain"
+	service2 "example.com/mod/webook/interactive/service"
 	"example.com/mod/webook/internal/domain"
 	"example.com/mod/webook/internal/service"
 	"fmt"
@@ -18,11 +20,11 @@ var _ handler = (*ArticleHandler)(nil)
 
 type ArticleHandler struct {
 	svc      service.ArticleService
-	interSvc service.InteractiveService
+	interSvc service2.InteractiveService
 	biz      string
 }
 
-func NewArticleHandler(svc service.ArticleService, interSvc service.InteractiveService) *ArticleHandler {
+func NewArticleHandler(svc service.ArticleService, interSvc service2.InteractiveService) *ArticleHandler {
 	return &ArticleHandler{
 		svc:      svc,
 		interSvc: interSvc,
@@ -102,7 +104,7 @@ func (ah *ArticleHandler) PubDetail(ctx *gin.Context) {
 		return err
 	})
 
-	var intr domain.Interactive
+	var intr domain2.Interactive
 	eg.Go(func() error {
 		//如果这里的错误可以容能的话,记录日志即可 返回nil
 		intr, err = ah.interSvc.Get(ctx, ah.biz, artId, claim.Uid)
