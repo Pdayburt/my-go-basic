@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "example.com/mod/grpc";
+option go_package = "example.com/mod/webookgrpc";
 
 
 message User{

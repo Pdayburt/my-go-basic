@@ -12,5 +12,6 @@ func InitTable(db *gorm.DB) error {
 		zap.L().Error(" InitTable database connection is nil", zap.Error(errors.New("传入的db *gorm.DB为空")))
 		return errors.New("database connection is nil")
 	}
-	return db.AutoMigrate(&Interactive{})
+	//UserLikeBiz Interactive Collection  UserCollectionBiz
+	return db.AutoMigrate(&UserLikeBiz{}, &Interactive{}, &Collection{}, &UserCollectionBiz{})
 }

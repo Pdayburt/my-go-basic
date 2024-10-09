@@ -17,7 +17,7 @@ package integration
 //	suite.Suite
 //	db     *gorm.DB
 //	rdb    redis.Cmdable
-//	server *grpc.InteractiveServiceServer
+//	server *webookgrpc.InteractiveServiceServer
 //}
 //
 //func (s *InteractiveTestSuite) SetupSuite() {

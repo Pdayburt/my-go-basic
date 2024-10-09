@@ -14,17 +14,24 @@ type InteractiveService interface {
 	CancelLike(ctx context.Context, biz string, id int64, uid int64) error
 	Collect(ctx context.Context, biz string, bizId, cid, uid int64) error
 	Get(ctx context.Context, biz string, bizId int64, uid int64) (domain.Interactive, error)
-	GetByIds(ctx context.Context, biz string, ids []int64) (domain.Interactive, error)
+	GetByIds(ctx context.Context, biz string, ids []int64) (map[int64]domain.Interactive, error)
 }
 
 type interactiveService struct {
 	repo repository.InteractiveRepository
 }
 
-func (i *interactiveService) GetByIds(ctx context.Context, biz string, ids []int64) (domain.Interactive, error) {
+func (i *interactiveService) GetByIds(ctx context.Context, biz string, ids []int64) (map[int64]domain.Interactive, error) {
 
-	//TODO implement me
-	panic("implement me")
+	intrs, err := i.repo.GetByIds(ctx, biz, ids)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[int64]domain.Interactive, len(intrs))
+	for _, intr := range intrs {
+		res[intr.BizId] = intr
+	}
+	return res, nil
 }
 
 func (i *interactiveService) Collect(ctx context.Context, biz string, bizId, cid, uid int64) error {
@@ -34,7 +41,6 @@ func (i *interactiveService) Collect(ctx context.Context, biz string, bizId, cid
 
 func (i *interactiveService) Get(ctx context.Context, biz string,
 	bizId int64, uid int64) (domain.Interactive, error) {
-
 	var (
 		eg        errgroup.Group
 		intr      domain.Interactive

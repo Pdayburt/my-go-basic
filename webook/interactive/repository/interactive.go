@@ -5,6 +5,7 @@ import (
 	"example.com/mod/webook/interactive/domain"
 	"example.com/mod/webook/interactive/repository/cache"
 	"example.com/mod/webook/interactive/repository/dao"
+	"github.com/ecodeclub/ekit/slice"
 	"go.uber.org/zap"
 )
 
@@ -17,11 +18,23 @@ type InteractiveRepository interface {
 	Liked(ctx context.Context, biz string, id int64, uid int64) (bool, error)
 	Collected(ctx context.Context, biz string, id int64, uid int64) (bool, error)
 	Get(ctx context.Context, biz string, id int64) (domain.Interactive, error)
+	GetByIds(ctx context.Context, biz string, ids []int64) ([]domain.Interactive, error)
 }
 
 type interactiveRepository struct {
 	dao   dao.InteractiveDao
 	cache cache.InteractiveCache
+}
+
+func (i *interactiveRepository) GetByIds(ctx context.Context, biz string, ids []int64) ([]domain.Interactive, error) {
+	vals, err := i.dao.GetByIds(ctx, biz, ids)
+	if err != nil {
+		return nil, err
+	}
+	return slice.Map[dao.Interactive, domain.Interactive](vals,
+		func(idx int, src dao.Interactive) domain.Interactive {
+			return i.toDomain(src)
+		}), nil
 }
 
 func (i *interactiveRepository) BatchIncrReadCnt(ctx context.Context, biz []string, id []int64) error {

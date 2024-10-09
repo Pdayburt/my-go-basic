@@ -29,7 +29,6 @@ func (s *Server) GetById(ctx context.Context, req *GetByIdReq) (*GetByIdResp, er
 func TestServer(t *testing.T) {
 
 	grpcSvc := grpc.NewServer()
-	defer grpcSvc.GracefulStop()
 	userSvc := &Server{}
 	RegisterUserServiceServer(grpcSvc, userSvc)
 	listener, err := net.Listen("tcp", ":8090")

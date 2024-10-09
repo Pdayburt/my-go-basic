@@ -16,15 +16,15 @@ func main() {
 
 	InitViperV1()
 	InitLogger()
-	InitPrometheus()
+	//InitPrometheus()
 	app := InitWebServerByWire()
 
-	for _, c := range app.consumer {
-		err := c.Start()
-		if err != nil {
-			panic(err)
-		}
-	}
+	//for _, c := range app.consumer {
+	//	err := c.Start()
+	//	if err != nil {
+	//		panic(err)
+	//	}
+	//}
 
 	cron := app.cron
 	cron.Start()

@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"example.com/mod/webook/interactive/service"
+	intrv1 "example.com/mod/webook/api/proto/gen/intr/v1"
 	"example.com/mod/webook/internal/domain"
 	"github.com/ecodeclub/ekit/queue"
 	"go.uber.org/zap"
@@ -16,13 +16,13 @@ type RankingService interface {
 
 type BatchRankingService struct {
 	artSvc    ArticleService
-	intrSvc   service.InteractiveService
+	intrSvc   intrv1.InteractiveServiceClient
 	batchSize int
 	n         int
 	scoreFunc func(t time.Time, likeCnt int64) float64
 }
 
-func NewBatchRankingService(artSvc ArticleService, intrSvc service.InteractiveService) RankingService {
+func NewBatchRankingService(artSvc ArticleService, intrSvc intrv1.InteractiveServiceClient) RankingService {
 	return &BatchRankingService{artSvc: artSvc, intrSvc: intrSvc}
 }
 
@@ -58,7 +58,10 @@ func (b *BatchRankingService) topN(ctx context.Context) ([]domain.Article, error
 		ids = append(ids, art.Id)
 	}
 
-	_, err = b.intrSvc.GetByIds(ctx, "article", ids)
+	_, err = b.intrSvc.GetByIds(ctx, &intrv1.GetByIdsReq{
+		Biz: "article",
+		Ids: ids,
+	})
 	if err != nil {
 		return nil, err
 	}

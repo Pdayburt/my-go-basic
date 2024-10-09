@@ -10,8 +10,8 @@ plugins:
     out: api/proto/gen
 
 
-  - plugin: buf.build/grpc/go:v1.5.1
-    # protoc-gen-go-grpc 插件
+  - plugin: buf.build/webookgrpc/go:v1.5.1
+    # protoc-gen-go-webookgrpc 插件
     out: api/proto/gen
 
 

@@ -20,10 +20,17 @@ type InteractiveDao interface {
 	GetCollectionInfo(ctx context.Context, biz string, id int64, uid int64) (UserCollectionBiz, error)
 	Get(ctx context.Context, biz string, id int64) (Interactive, error)
 	BatchIncrReadCnt(ctx context.Context, biz []string, id []int64) error
+	GetByIds(ctx context.Context, biz string, ids []int64) ([]Interactive, error)
 }
 
 type interactiveDao struct {
 	db *gorm.DB
+}
+
+func (i *interactiveDao) GetByIds(ctx context.Context, biz string, ids []int64) ([]Interactive, error) {
+	var res []Interactive
+	err := i.db.WithContext(ctx).Where("biz = ? AND id IN ?", biz, ids).Find(&res).Error
+	return res, err
 }
 
 func NewInteractiveDao(db *gorm.DB) InteractiveDao {
@@ -49,9 +56,11 @@ func (i *interactiveDao) BatchIncrReadCnt(ctx context.Context, biz []string, id 
 }
 
 func (i *interactiveDao) Get(ctx context.Context, biz string, id int64) (Interactive, error) {
-
-	//TODO implement me
-	panic("implement me")
+	var intr Interactive
+	err := i.db.WithContext(ctx).
+		Where("biz = ? and id = ?", biz, id).
+		Find(&intr).Error
+	return intr, err
 }
 
 func (i *interactiveDao) GetCollectionInfo(ctx context.Context, biz string, id int64, uid int64) (UserCollectionBiz, error) {
@@ -195,7 +204,7 @@ func (i *interactiveDao) IncrReadCnt(ctx context.Context, biz string, bizId int6
 
 type UserLikeBiz struct {
 	Id    int64  `gorm:"primaryKey,autoIncrement:false"`
-	Biz   string `gorm:"uniqueIndex:idx_uid_biz_id_biz,type:varchar(128)"`
+	Biz   string `gorm:"type:varchar(128);uniqueIndex:idx_uid_biz_id_biz"`
 	BizId int64  `gorm:"uniqueIndex:idx_uid_biz_id_biz"`
 	//谁的操作
 	Uid   int64 `gorm:"uniqueIndex:idx_uid_biz_id_biz"`
@@ -216,6 +225,7 @@ type Interactive struct {
 	Utime      int64
 }
 
+// Error 1170 (42000): BLOB/TEXT column 'biz' used in key specification without a key length
 // Collection 收藏夹
 type Collection struct {
 	Id   int64  `gorm:"primaryKey,autoIncrement"`

@@ -2,8 +2,7 @@ package web
 
 import (
 	"errors"
-	domain2 "example.com/mod/webook/interactive/domain"
-	service2 "example.com/mod/webook/interactive/service"
+	intrv1 "example.com/mod/webook/api/proto/gen/intr/v1"
 	"example.com/mod/webook/internal/domain"
 	"example.com/mod/webook/internal/service"
 	"fmt"
@@ -20,11 +19,11 @@ var _ handler = (*ArticleHandler)(nil)
 
 type ArticleHandler struct {
 	svc      service.ArticleService
-	interSvc service2.InteractiveService
+	interSvc intrv1.InteractiveServiceClient
 	biz      string
 }
 
-func NewArticleHandler(svc service.ArticleService, interSvc service2.InteractiveService) *ArticleHandler {
+func NewArticleHandler(svc service.ArticleService, interSvc intrv1.InteractiveServiceClient) *ArticleHandler {
 	return &ArticleHandler{
 		svc:      svc,
 		interSvc: interSvc,
@@ -62,9 +61,17 @@ func (ah *ArticleHandler) Like(ctx *gin.Context) {
 	}
 	var err error
 	if likeReq.Like {
-		err = ah.interSvc.Like(ctx, ah.biz, likeReq.Id, claim.Uid)
+		_, err = ah.interSvc.Like(ctx, &intrv1.LikeReq{
+			Biz:   ah.biz,
+			BizId: likeReq.Id,
+			Uid:   claim.Uid,
+		})
 	} else {
-		err = ah.interSvc.CancelLike(ctx, ah.biz, likeReq.Id, claim.Uid)
+		_, err = ah.interSvc.CancelLike(ctx, &intrv1.CancelLikeReq{
+			Biz:   ah.biz,
+			BizId: likeReq.Id,
+			Uid:   claim.Uid,
+		})
 	}
 	if err != nil {
 		ctx.JSON(http.StatusOK, Result{
@@ -104,10 +111,16 @@ func (ah *ArticleHandler) PubDetail(ctx *gin.Context) {
 		return err
 	})
 
-	var intr domain2.Interactive
+	var intr *intrv1.GetResp
 	eg.Go(func() error {
 		//如果这里的错误可以容能的话,记录日志即可 返回nil
-		intr, err = ah.interSvc.Get(ctx, ah.biz, artId, claim.Uid)
+		//intr, err = ah.interSvc.Get(ctx, ah.biz, artId, claim.Uid)
+		intr, err = ah.interSvc.Get(ctx, &intrv1.GetReq{
+			Biz:   ah.biz,
+			BizId: artId,
+			Uid:   claim.Uid,
+		})
+
 		if err != nil {
 			zap.L().Error("查询附属信息错误", zap.Error(err))
 		}
@@ -129,7 +142,11 @@ func (ah *ArticleHandler) PubDetail(ctx *gin.Context) {
 	}
 	//以下是异步执行
 	go func() {
-		er := ah.interSvc.IncrReadCnt(ctx, ah.biz, art.Id)
+		//	er := ah.interSvc.IncrReadCnt(ctx, ah.biz, art.Id)
+		_, er := ah.interSvc.IncrReadCnt(ctx, &intrv1.IncrReadCntReq{
+			Biz:   ah.biz,
+			BizId: art.Id,
+		})
 		if er != nil {
 			zap.L().Error("增加阅读计数失败", zap.Int64("aid", art.Id), zap.Error(er))
 		}
@@ -147,11 +164,11 @@ func (ah *ArticleHandler) PubDetail(ctx *gin.Context) {
 			Author:     art.Author.Name,
 			Ctime:      art.Ctime.Format(time.RFC3339),
 			Utime:      art.Utime.Format(time.RFC3339),
-			Liked:      intr.Liked,
-			Collected:  intr.Collected,
-			LikeCnt:    intr.LikeCnt,
-			ReadCnt:    intr.ReadCnt,
-			CollectCnt: intr.CollectCnt,
+			Liked:      intr.Intr.Liked,
+			Collected:  intr.Intr.Collected,
+			LikeCnt:    intr.Intr.LikeCnt,
+			ReadCnt:    intr.Intr.ReadCnt,
+			CollectCnt: intr.Intr.CollectCnt,
 		},
 	})
 
